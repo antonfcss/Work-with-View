@@ -65,16 +65,10 @@ class CustomClockView(context: Context, attrs: AttributeSet? = null, defaultAttr
         val angle = Math.PI * loc / 30 - Math.PI / 2
         paint!!.color = handType.color
         paint!!.strokeWidth = handType.thickness
-
-        val handRadius =
-            if (handType == HandType.HOUR) radius - handTruncation - hourHandTruncation else radius - handTruncation
-        canvas.drawLine(
-            (width / 2).toFloat(),
-            (height / 2).toFloat(),
-            (width / 2 + cos(angle) * handRadius).toFloat(),
-            (height / 2 + sin(angle) * handRadius).toFloat(),
-            paint!!
-        )
+        val handRadius = radius * handType.length
+        val x = (width / 2 + cos(angle) * handRadius).toFloat()
+        val y = (height / 2 + sin(angle) * handRadius).toFloat()
+        canvas.drawLine((width / 2).toFloat(), (height / 2).toFloat(), x, y, paint!!)
         paint!!.reset()
     }
 
@@ -95,12 +89,13 @@ class CustomClockView(context: Context, attrs: AttributeSet? = null, defaultAttr
     private fun drawNumeral(canvas: Canvas) {
         paint!!.textSize = fontSize.toFloat()
         paint!!.color = Color.WHITE
+        val offset = 10
         for (number in numbers) {
             val tmp = number.toRoman()
             paint!!.getTextBounds(tmp, 0, tmp.length, rect)
             val angle = Math.PI / 6 * (number - 3)
-            val x = (width / 2 + cos(angle) * radius - rect.width() / 2).toInt()
-            val y = (height / 2 + sin(angle) * radius + rect.height() / 2).toInt()
+            val x = (width / 2 + cos(angle) * (radius + offset) - rect.width() / 2).toInt()
+            val y = (height / 2 + sin(angle) * (radius + offset) + rect.height() / 2).toInt()
             canvas.drawText(tmp, x.toFloat(), y.toFloat(), paint!!)
         }
     }
