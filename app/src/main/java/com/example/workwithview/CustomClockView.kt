@@ -6,10 +6,11 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
-import android.icu.util.Calendar
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
+import java.util.Calendar
+import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
@@ -55,15 +56,18 @@ class CustomClockView(context: Context, attrs: AttributeSet? = null, defaultAttr
         drawCenter(canvas)
         drawNumeral(canvas)
         drawHands(canvas)
+        drawDayOfWeek(canvas)
         postInvalidateDelayed(500)
         invalidate()
     }
 
-    private fun drawHand(canvas: Canvas, loc: Float, isHour: Boolean, colorHand: Int) {
+    private fun drawHand(canvas: Canvas, loc: Float, handType: HandType) {
         val angle = Math.PI * loc / 30 - Math.PI / 2
-        paint!!.color = colorHand
+        paint!!.color = handType.color
+        paint!!.strokeWidth = handType.thickness
+
         val handRadius =
-            if (isHour) radius - handTruncation - hourHandTruncation else radius - handTruncation
+            if (handType == HandType.HOUR) radius - handTruncation - hourHandTruncation else radius - handTruncation
         canvas.drawLine(
             (width / 2).toFloat(),
             (height / 2).toFloat(),
@@ -71,6 +75,7 @@ class CustomClockView(context: Context, attrs: AttributeSet? = null, defaultAttr
             (height / 2 + sin(angle) * handRadius).toFloat(),
             paint!!
         )
+        paint!!.reset()
     }
 
     private fun drawHands(canvas: Canvas) {
@@ -80,11 +85,10 @@ class CustomClockView(context: Context, attrs: AttributeSet? = null, defaultAttr
         drawHand(
             canvas,
             ((hour * 5f) + (calendar.get(Calendar.MINUTE) * 5f / 60.0)).toFloat(),
-            true,
-            Color.RED
+            HandType.HOUR
         )
-        drawHand(canvas, calendar.get(Calendar.MINUTE).toFloat(), false, Color.WHITE)
-        drawHand(canvas, calendar.get(Calendar.SECOND).toFloat(), false, Color.WHITE)
+        drawHand(canvas, calendar.get(Calendar.MINUTE).toFloat(), HandType.MINUTE)
+        drawHand(canvas, calendar.get(Calendar.SECOND).toFloat(), HandType.SECOND)
     }
 
 
@@ -129,10 +133,24 @@ class CustomClockView(context: Context, attrs: AttributeSet? = null, defaultAttr
             paint!!
         )
     }
+    private fun drawDayOfWeek(canvas: Canvas) {
+        val calendar = Calendar.getInstance()
+        val dayOfWeek =
+            calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault())
+        paint!!.textSize = fontSize.toFloat() * 1.5f
+        paint!!.color = Color.WHITE
+        val textBounds = Rect()
+        paint!!.getTextBounds(dayOfWeek, 0, dayOfWeek.length, textBounds)
+        canvas.drawText(
+            dayOfWeek,
+            (width - textBounds.width()) / 2f,
+            (height / 10).toFloat(),
+            paint!!
+        )
+    }
 
     fun Int.toRoman(): String {
         val romanNumbersArray = arrayOfNulls<String>(13)
-
         romanNumbersArray[0] = ""
         romanNumbersArray[1] = "I"
         romanNumbersArray[2] = "II"
@@ -146,7 +164,6 @@ class CustomClockView(context: Context, attrs: AttributeSet? = null, defaultAttr
         romanNumbersArray[10] = "X"
         romanNumbersArray[11] = "XI"
         romanNumbersArray[12] = "XII"
-
         return romanNumbersArray[this]!!
     }
 }
