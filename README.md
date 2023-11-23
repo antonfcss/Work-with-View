@@ -1,3 +1,4 @@
-## Sample 
+<center>
+### Sample </center>
 
-![untitled](https://github.com/antonfcss/Work-with-View/assets/95831815/246d50f7-5871-4862-8719-434770cbfa43)
+![untitled](https://github.com/antonfcss/Work-with-View/assets/95831815/24ddeaff-d542-422b-8c22-10cb286eb84e)
